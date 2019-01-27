@@ -1,0 +1,7 @@
+[package]
+name = "GameMazeGenerator"
+version = "0.1.0"
+authors = ["Aggrathon <antonbjo@gmail.com>"]
+
+[dependencies]
+rand = "0.6"
