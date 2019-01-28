@@ -17,7 +17,7 @@ impl Rect {
     }
 }
 
-pub fn add_structures(maze: &mut Maze, count: usize, max_width: usize, max_height: usize, wall_offset: usize, max_doors: usize) -> Vec<usize> {
+pub fn generate(maze: &mut Maze, count: usize, max_width: usize, max_height: usize, wall_offset: usize, max_doors: usize) -> Vec<usize> {
     let mut rnd = rand::thread_rng();
     let mut struc: Vec<Rect> = Vec::new();
     let mut doors: Vec<usize> = Vec::new();

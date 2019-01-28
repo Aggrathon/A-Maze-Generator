@@ -3,6 +3,8 @@ use rand::thread_rng;
 use rand::seq::SliceRandom;
 
 mod structures;
+mod wilson;
+mod kruskal;
 
 pub struct Maze {
     pub maze: Vec<i32>,
@@ -32,11 +34,9 @@ impl Maze {
         let mut rnd = thread_rng();
         let str_size = 3;
         let str_cnt = (self.width * self.height) / (str_size * str_size * 2);
-        let doors: Vec<usize> = structures::add_structures(self, str_cnt, str_size, str_size, 3, 4);
+        let doors: Vec<usize> = structures::generate(self, str_cnt, str_size, str_size, 3, 4);
         for i in doors.iter() {
-            let x = *i%self.width;
-            let y = *i/self.width;
-            wilson(self, x, y);
+            wilson::random_walk(self, *i);
         }
         loop {
             let mut tiles: Vec<usize> = (0..(self.width*self.height)).filter(|x| self.maze[*x] == 0).collect();
@@ -44,19 +44,16 @@ impl Maze {
             for i in tiles.iter() {
                 let neigh: Vec<i32> = vec![i-1, i+1, i-self.width, i+self.width].into_iter().map(|x| self.maze[x]).filter(|x| *x > 0).collect();
                 if neigh.len() == 0 {
-                    let x = *i%self.width;
-                    let y = *i/self.width;
-                    wilson(self, x, y);
+                    wilson::random_walk(self, *i);
                 } else if neigh.len() > 1 && neigh.iter().any(|x| *x != neigh[1]) {
-                    let x = *i%self.width;
-                    let y = *i/self.width;
-                    kruskal(self, x, y);
+                    kruskal::set_join(self, *i);
                 }
             }
             if doors.iter().all(|x| self.maze[*x] == 1) {
                 break;
             }
         }
+        //TODO: Remove stubs
     }
 
     pub fn get(&self, x:usize, y:usize) -> i32 {
@@ -84,34 +81,4 @@ impl Maze {
             println!();
         }
     }
-}
-
-pub fn wilson(maze: &mut Maze, x: usize, y: usize) {
-    let index: usize = x + y * maze.width;
-    if maze.maze.len() <= index || maze.maze[index] > 0 {
-        return;
-    } else {
-        let mut walk: Vec<usize> = vec![index];
-        // Random Walk
-        // Remove Loops
-        // Update maze
-        return;
-    }
-}
-
-pub fn kruskal(mase: &mut Maze, x: usize, y: usize) {
-
-}
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // #[test]
-    // fn test_wilson() {
-    //     let mut maze = Maze::new(5, 5);
-    //     wilson(&mut maze, 3, 3);
-    //     assert_ne!(maze.get(3, 3), 0);
-    // }
 }
