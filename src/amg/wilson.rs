@@ -16,9 +16,8 @@ pub fn random_walk(maze: &mut Maze, index: usize) {
         'outer: loop {
             dirs.shuffle(&mut rng);
             for d in dirs.iter() {
-                let di = (*d + i) as usize;
+                let di = (*d + *walk.last().unwrap() as i32) as usize;
                 if maze.maze[di] > 0 && maze.maze[*walk.last().unwrap()] != maze.maze[di] {
-                    walk.push(di);
                     break 'outer;
                 }
                 if maze.maze[di] == 0 {
@@ -26,6 +25,8 @@ pub fn random_walk(maze: &mut Maze, index: usize) {
                     continue 'outer;
                 }
             }
+            //backtrack?
+            if walk.len() == 1 { return; }
             break;
         }
         // TODO: Remove Loops

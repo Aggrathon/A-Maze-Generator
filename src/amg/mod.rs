@@ -35,25 +35,27 @@ impl Maze {
         let str_size = 3;
         let str_cnt = (self.width * self.height) / (str_size * str_size * 2);
         let doors: Vec<usize> = structures::generate(self, str_cnt, str_size, str_size, 3, 4);
-        for i in doors.iter() {
+        let size = self.maze.len();
+        let important_points: Vec<usize> = (0..size).filter(|x| self.maze[*x] > 0).collect();
+        for i in important_points.iter() {
             wilson::random_walk(self, *i);
         }
         loop {
-            let mut tiles: Vec<usize> = (0..(self.width*self.height)).filter(|x| self.maze[*x] == 0).collect();
+            let mut tiles: Vec<usize> = (0..size).filter(|x| self.maze[*x] == 0).collect();
             tiles.shuffle(&mut rnd);
             for i in tiles.iter() {
                 let neigh: Vec<i32> = vec![i-1, i+1, i-self.width, i+self.width].into_iter().map(|x| self.maze[x]).filter(|x| *x > 0).collect();
-                if neigh.len() == 0 {
+                if neigh.len() < 2 {
                     wilson::random_walk(self, *i);
                 } else if neigh.len() > 1 && neigh.iter().any(|x| *x != neigh[1]) {
                     kruskal::set_join(self, *i);
                 }
             }
-            if doors.iter().all(|x| self.maze[*x] == 1) {
+            if important_points.iter().all(|x| self.maze[*x] == 1) {
                 break;
             }
         }
-        //TODO: Remove stubs
+        //TODO: Remove stubs (randomly)
     }
 
     pub fn get(&self, x:usize, y:usize) -> i32 {
