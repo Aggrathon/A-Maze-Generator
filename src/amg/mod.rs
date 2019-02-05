@@ -33,21 +33,26 @@ impl Maze {
     pub fn generate(&mut self) {
         let mut rnd = thread_rng();
         let str_size = 3;
-        let str_cnt = (self.width * self.height) / (str_size * str_size * 2);
-        let doors: Vec<usize> = structures::generate(self, str_cnt, str_size, str_size, 3, 4);
+        let str_cnt = (self.width * self.height) / (str_size * str_size * 4);
+        // Structures
+        let _structures: Vec<usize> = structures::generate(self, str_cnt, str_size, str_size, 3, 4);
         let size = self.maze.len();
         let important_points: Vec<usize> = (0..size).filter(|x| self.maze[*x] > 0).collect();
         for i in important_points.iter() {
+            if *i > self.width && *i < (self.height - 1) * self.width { kruskal::set_join(self, *i); }
             wilson::random_walk(self, *i);
         }
+        // Maze
+        let dirs: Vec<i32> = vec![-1, 1, -(self.width as i32), self.width as i32];
         loop {
             let mut tiles: Vec<usize> = (0..size).filter(|x| self.maze[*x] == 0).collect();
             tiles.shuffle(&mut rnd);
             for i in tiles.iter() {
-                let neigh: Vec<i32> = vec![i-1, i+1, i-self.width, i+self.width].into_iter().map(|x| self.maze[x]).filter(|x| *x > 0).collect();
-                if neigh.len() < 2 {
+                if self.maze[*i] != 0 { continue; }
+                let neigh: Vec<i32> = dirs.iter().map(|x| self.maze[(*i as i32 + x) as usize]).filter(|x| *x > 0).collect();
+                if neigh.len() == 0 {
                     wilson::random_walk(self, *i);
-                } else if neigh.len() > 1 && neigh.iter().any(|x| *x != neigh[1]) {
+                } else if neigh.iter().any(|x| *x != neigh[0]) {
                     kruskal::set_join(self, *i);
                 }
             }
@@ -55,7 +60,16 @@ impl Maze {
                 break;
             }
         }
-        //TODO: Remove stubs (randomly)
+        // Remove stubs (randomly)
+        let mut spaces: Vec<usize> = (self.width..(size-self.width)).filter(|x| self.maze[*x] == 1 && 
+            vec![*x + 1, *x - 1, *x + self.width, *x - self.width].iter().filter(|y| self.maze[**y] > 0).count() == 1).collect();
+        spaces.shuffle(&mut rnd);
+        for i in spaces.iter() {
+            let j = vec![*i + 1, *i - 1, *i + self.width, *i - self.width].iter().filter(|y| self.maze[**y] > 0).fold(*i, |_, x| *x);
+            if vec![j + 1, j - 1, j + self.width, j - self.width].iter().filter(|y| self.maze[**y] > 0).count() > 2 {
+                self.maze[*i] = 0;
+            }
+        }
     }
 
     pub fn get(&self, x:usize, y:usize) -> i32 {

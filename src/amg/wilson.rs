@@ -10,7 +10,10 @@ pub fn random_walk(maze: &mut Maze, index: usize) {
     if maze.maze.len() <= index || maze.maze[index] > 0 {
         return;
     } else {
+        let mut cover: Vec<i32> = maze.maze.iter().map(|x| if *x == 0 { 0 } else { -1 }).collect();
         let mut walk: Vec<usize> = vec![index];
+        let mut counter: i32 = 2;
+        cover[index] = 1;
         let mut dirs: Vec<i32> = vec![-1, 1, -(maze.width as i32), maze.width as i32];
         // Random Walk
         'outer: loop {
@@ -18,25 +21,30 @@ pub fn random_walk(maze: &mut Maze, index: usize) {
             for d in dirs.iter() {
                 let di = (*d + *walk.last().unwrap() as i32) as usize;
                 if maze.maze[di] > 0 && maze.maze[*walk.last().unwrap()] != maze.maze[di] {
-                    break 'outer;
+                    break 'outer; // Found existing part of the maze, random walk is done
                 }
-                if maze.maze[di] == 0 {
+                if cover[di] == 0 && maze.maze[di] == 0 {
                     walk.push(di);
+                    cover[di] = counter;
+                    counter += 1;
                     continue 'outer;
                 }
             }
-            //backtrack?
-            if walk.len() == 1 { return; }
-            break;
+            walk.pop(); // Backtrack if dead end
+            if walk.len() == 0 { return; }
         }
-        // TODO: Remove Loops
-        // Update maze
-        dirs.push(0);
+        // Reconstruct the path
+        let mut end: usize = *walk.last().unwrap();
         let set = dirs.iter().map(|x| (x + i) as usize)
-            .chain(dirs.iter().map(|x| (x + *walk.last().unwrap() as i32) as usize))
-            .fold(maze.counter, |x, di| if maze.maze[di] > 0 { maze.maze[di] } else { x });
-        for w in walk.iter() {
-            maze.maze[*w] = set;
+            .chain(dirs.iter().map(|x| (x + end as i32) as usize))
+            .fold(if maze.maze[index] > 0 { maze.maze[index] } else { maze.counter }, |x, di| if maze.maze[di] > 0 { maze.maze[di] } else { x });
+        maze.maze[index] = set;
+        while cover[end] > 1 {
+            maze.maze[end] = set;
+            end = dirs.iter().fold(end, |x, di| {
+                let d = (di + end as i32) as usize;
+                if cover[d] > 0 && cover[d] < cover[x] { d } else { x }
+            });
         }
         maze.counter += 1;
         kruskal::set_join(maze, index);

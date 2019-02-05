@@ -21,7 +21,7 @@ pub fn generate(maze: &mut Maze, count: usize, max_width: usize, max_height: usi
     let mut rnd = rand::thread_rng();
     let mut struc: Vec<Rect> = Vec::new();
     let mut doors: Vec<usize> = Vec::new();
-    'outer: for i in 0..count {
+    'outer: for _ in 0..count {
         // Generate Room
         let w = rnd.gen_range(2, max_width+1);
         let h = rnd.gen_range(2, max_height+1);

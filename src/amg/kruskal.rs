@@ -17,3 +17,5 @@ pub fn set_join(maze: &mut Maze, index: usize) {
         if y > 0 && maze.maze[i-maze.width] > set { stack.push(i-maze.width); maze.maze[i-maze.width] = set; }
     }
 }
+
+//TODO: Tests
