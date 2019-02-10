@@ -4,7 +4,8 @@ use super::kruskal;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 
-// This is a implementation of the Wilson (random walk) maze algorithm that has been modified to include backtacking
+// This is a implementation of the Wilson (random walk) maze algorithm that has been
+// modified to include backtacking and handle already existing rooms
 pub fn random_walk(maze: &mut Maze, index: usize) {
     let i = index as i32;
     let mut rng = thread_rng();
