@@ -1,6 +1,7 @@
 
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+use itertools::Itertools;
 
 mod structures;
 mod wilson;
@@ -35,15 +36,25 @@ impl Maze {
         let str_size = 3;
         let str_cnt = (self.width * self.height) / (str_size * str_size * 4);
         // Structures
-        let _structures: Vec<usize> = structures::generate(self, str_cnt, str_size, str_size, 3, 4);
+        structures::generate(self, str_cnt, str_size, str_size, 3, 4);
         let size = self.maze.len();
         let important_points: Vec<usize> = (0..size).filter(|x| self.maze[*x] > 0).collect();
         for i in important_points.iter() {
-            if *i > self.width && *i < (self.height - 1) * self.width { kruskal::set_join(self, *i); }
-            wilson::random_walk(self, *i);
+            if *i >= self.width && *i < size - self.width {
+                wilson::random_walk(self, *i);
+            }
         }
-        // Maze
+        // Wilson Random Walk
         let dirs: Vec<i32> = vec![-1, 1, -(self.width as i32), self.width as i32];
+        let mut tiles: Vec<usize> = (0..size).filter(|x| self.maze[*x] == 0).collect();
+        tiles.shuffle(&mut rnd);
+        for i in tiles.iter() {
+            if self.maze[*i] != 0 { continue; }
+            if dirs.iter().map(|x| self.maze[(*i as i32 + x) as usize]).filter(|x| *x > 0).count() == 0 {
+                wilson::random_walk(self, *i);
+            }
+        }
+        // Kruskal Set Join
         loop {
             let mut tiles: Vec<usize> = (0..size).filter(|x| self.maze[*x] == 0).collect();
             tiles.shuffle(&mut rnd);
@@ -52,13 +63,14 @@ impl Maze {
                 let neigh: Vec<i32> = dirs.iter().map(|x| self.maze[(*i as i32 + x) as usize]).filter(|x| *x > 0).collect();
                 if neigh.len() == 0 {
                     wilson::random_walk(self, *i);
-                } else if neigh.iter().any(|x| *x != neigh[0]) {
+                } else if neigh.len() == 1 || neigh.iter().unique().count() > 1 {
                     kruskal::set_join(self, *i);
                 }
             }
-            if important_points.iter().all(|x| self.maze[*x] == 1) {
+            if important_points.iter().map(|x| self.maze[*x]).unique().count() == 1 {
                 break;
             }
+            break;
         }
         // Remove stubs (randomly)
         let mut spaces: Vec<usize> = (self.width..(size-self.width)).filter(|x| self.maze[*x] == 1 && 

@@ -1,26 +1,33 @@
 use super::Maze;
 use rand::{Rng, seq::IteratorRandom};
 
-struct Rect(usize, usize, usize, usize);
+pub struct Rect(usize, usize, usize, usize);
 
 impl Rect {
     fn overlaps(&self, other: &Rect) -> bool {
         !(self.2 < other.0 || self.0 > other.2 || self.3 < other.1 || self.1 > other.3)
     }
 
-    fn border(&self, width: usize) -> Vec<usize> {
-        let t = (self.0 + (self.1 - 1) * width)..(self.2 + (self.1 - 1) * width);
-        let b = (self.0 + (self.3) * width)..(self.2 + (self.3) * width);
+    fn border<P>(&self, width: usize, corners: bool, f: P) where P: FnMut(usize) {
+        let t;
+        let b;
+        if corners {
+            t = (self.0 - 1 + (self.1 - 1) * width)..(self.2 + 1 + (self.1 - 1) * width);
+            b = (self.0 - 1 + (self.3) * width)..(self.2 + 1 + (self.3) * width);
+        } else {
+            t = (self.0 + (self.1 - 1) * width)..(self.2 + (self.1 - 1) * width);
+            b = (self.0 + (self.3) * width)..(self.2 + (self.3) * width);
+        }
         let l = (self.1..self.3).map(|x| x * width + self.0 - 1);
         let r = (self.1..self.3).map(|x| x * width + self.2);
-        t.chain(b).chain(l).chain(r).collect()
+        t.chain(b).chain(l).chain(r).for_each(f);
     }
 }
 
-pub fn generate(maze: &mut Maze, count: usize, max_width: usize, max_height: usize, wall_offset: usize, max_doors: usize) -> Vec<usize> {
+pub fn generate(maze: &mut Maze, count: usize, max_width: usize, max_height: usize, wall_offset: usize, max_doors: usize) -> Vec<Rect> {
     let mut rnd = rand::thread_rng();
     let mut struc: Vec<Rect> = Vec::new();
-    let mut doors: Vec<usize> = Vec::new();
+    let mut walls: Vec<usize> = Vec::new();
     'outer: for _ in 0..count {
         // Generate Room
         let w = rnd.gen_range(2, max_width+1);
@@ -38,22 +45,16 @@ pub fn generate(maze: &mut Maze, count: usize, max_width: usize, max_height: usi
                 maze.maze[j + k * maze.width] = maze.counter;
             }
         }
-        // Create Walls
-        let wall: Vec<usize> = r.border(maze.width);
-        for j in wall.iter() {
-            maze.maze[*j] = -1;
-        }
-        // Create Doors
+        // Create Walls & Doors
+        r.border(maze.width, true, |x| maze.maze[x] = -1);
         let nd = rnd.gen_range(2, max_doors);
-        let door: Vec<usize> = wall.into_iter().choose_multiple(&mut rnd, nd);
-        for j in door.iter() {
-            maze.maze[*j] = maze.counter;
-        }
-        doors.extend(door);
+        walls.clear();
+        r.border(maze.width, false, |x| walls.push(x));
+        walls.iter().choose_multiple(&mut rnd, nd).into_iter().for_each(|x| maze.maze[*x] = maze.counter);
         struc.push(r);
         maze.counter = maze.counter + 1
     }
-    doors
+    struc
 }
 
 #[cfg(test)]
