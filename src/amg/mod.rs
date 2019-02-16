@@ -6,11 +6,13 @@ use itertools::Itertools;
 mod structures;
 mod wilson;
 mod kruskal;
+mod image;
 
 pub struct Maze {
     pub maze: Vec<i32>,
     pub width: usize,
     pub height: usize,
+    pub structures: Vec<structures::Rect>,
     counter: i32
 }
 
@@ -28,15 +30,15 @@ impl Maze {
         let x = width / 2;
         maze[x] = 1;
         maze[width*height - x - 1] = 2;
-        Maze {maze, width, height, counter: 3}
+        Maze {maze, width, height, counter: 3, structures: vec![]}
     }
 
     pub fn generate(&mut self) {
         let mut rnd = thread_rng();
-        let str_size = 3;
+        let str_size = 4;
         let str_cnt = (self.width * self.height) / (str_size * str_size * 4);
         // Structures
-        structures::generate(self, str_cnt, str_size, str_size, 3, 4);
+        self.structures = structures::generate(self, str_cnt, str_size, str_size, 3, 4);
         let size = self.maze.len();
         let important_points: Vec<usize> = (0..size).filter(|x| self.maze[*x] > 0).collect();
         for i in important_points.iter() {

@@ -1,5 +1,6 @@
 use super::Maze;
 use rand::{Rng, seq::IteratorRandom};
+use itertools::Itertools;
 
 pub struct Rect(usize, usize, usize, usize);
 
@@ -21,6 +22,10 @@ impl Rect {
         let l = (self.1..self.3).map(|x| x * width + self.0 - 1);
         let r = (self.1..self.3).map(|x| x * width + self.2);
         t.chain(b).chain(l).chain(r).for_each(f);
+    }
+
+    pub fn for_each<P>(&self, f: P) where P: FnMut((usize, usize)) {
+        (self.0..self.2).cartesian_product(self.1..self.3).for_each(f);
     }
 }
 

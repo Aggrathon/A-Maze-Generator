@@ -6,3 +6,4 @@ authors = ["Aggrathon <antonbjo@gmail.com>"]
 [dependencies]
 rand = "0.6"
 itertools = "0.8"
+image = "0.21"
