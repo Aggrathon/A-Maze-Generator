@@ -27,8 +27,9 @@ but some additions can improve the fun-value. My proposed additions are:
 
 ## Algorithm Structure
 
-TODO: Write More here
-The implementation is based on a four step process:
+The algorithm is essentially a combination of two existing maze algorithms,
+Wilson's and Kruskal's (short descriptions below), with the idea of premade
+structures. The implementation is based on a four step process:
 
 1. Generate/Define Structures:  
     - Start by creating the maze area and any static features, eg. start,
@@ -50,7 +51,20 @@ The implementation is based on a four step process:
     - This is an optional step.
 
 ### Wilson's algorithm
-TODO: Write
+
+From each unadded node in the graph do a random walk until
+you hit an existing part of the maze. Then backtrack the walk
+while removing loops and add the nodes to the maze.
+
+The random walk makes the time required indeterministic, which worse with
+larger mazes. In this implementation I added the constraint that
+the random walk cannot cross itself. This requires the introduction of
+backtracking when the algorithm has "painted itself into a corner".
+The results is a strict upper bound on the time required (O(n) where n
+is the size of the maze).
 
 ### Kruskal's algorithm
-TODO: Write
+
+Start with each node in its own set. For each pair of adjacent nodes
+if they are not in the same set create a passage between them and merge
+their sets.
