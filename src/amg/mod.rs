@@ -2,10 +2,11 @@
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 
-mod structures;
-mod wilson;
-mod kruskal;
-mod image;
+pub mod structures;
+pub mod wilson;
+pub mod kruskal;
+pub mod image;
+pub mod solve;
 mod utils;
 
 pub struct Maze {
@@ -44,9 +45,7 @@ impl Maze {
         for i in important_points.iter() {
             wilson::carve_from_room(self, *i);
         }
-        self.print();
         wilson::generate_sparse(self);
-        self.print();
         kruskal::generate(self);
         // Remove stubs (randomly)
         let mut spaces: Vec<usize> = (self.width..(size-self.width)).filter(|x| self.maze[*x] == 1 && 
@@ -99,9 +98,17 @@ mod tests {
     fn test_generate() {
         let mut maze = Maze::new(5, 5);
         maze.generate();
-        maze.print();
         assert!(maze.maze.iter().filter(|x| **x > 0).count() > 4);
         assert_eq!(maze.get(2, 4), maze.get(2, 0));
         assert_eq!(maze.get(2, 4), 1);
+    }
+
+    #[test]
+    fn test_index() {
+        let mut maze = Maze::new(5, 5);
+        maze.maze[13] = 3;
+        assert_eq!(3, maze.index_to_coordinate(13).0);
+        assert_eq!(2, maze.index_to_coordinate(13).1);
+        assert_eq!(3, maze.get(3, 2));
     }
 }
