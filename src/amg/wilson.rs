@@ -9,9 +9,7 @@ use rand::seq::SliceRandom;
 pub fn random_walk(maze: &mut Maze, index: usize) {
     let i = index as i32;
     let mut rng = thread_rng();
-    if maze.maze.len() <= index {
-        return;
-    } else {
+    if index < maze.maze.len() {
         let mut cover: Vec<i32> = maze.maze.iter().map(|x| if *x == 0 { 0 } else { -1 }).collect();
         let mut walk: Vec<usize> = vec![index];
         let mut counter: i32 = 2;

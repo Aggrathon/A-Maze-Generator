@@ -1,9 +1,12 @@
 
 use super::Maze;
+use super::utils;
+
+use rand::thread_rng;
+use rand::seq::SliceRandom;
 
 pub fn set_join(maze: &mut Maze, index: usize) {
-    let set: i32 = vec![index, index - 1, index + 1, index - maze.width, index + maze.width]
-        .iter().fold(maze.counter, |x, di| if maze.maze[*di] > 0 && maze.maze[*di] < x { maze.maze[*di] } else { x });
+    let set: i32 = utils::get_lowest_neighbour(&maze.maze, index, maze.width, maze.counter);
     if set == maze.counter { maze.counter += 1; }
     let mut stack = vec![index];
     maze.maze[index] = set;
@@ -18,4 +21,30 @@ pub fn set_join(maze: &mut Maze, index: usize) {
     }
 }
 
-//TODO: Tests
+pub fn generate(maze: &mut Maze) {
+    let mut rnd = thread_rng();
+    let mut tiles: Vec<usize> = (0..maze.maze.len()).filter(|x| maze.maze[*x] == 0).collect();
+    tiles.shuffle(&mut rnd);
+    for i in tiles.iter() {
+        match utils::get_num_diff_neighbours(&maze.maze, *i, maze.width) {
+            utils::DiffNeigh::None => { maze.maze[*i] = maze.counter; maze.counter += 1; },
+            utils::DiffNeigh::One => { set_join(maze, *i); },
+            utils::DiffNeigh::MultDiff => { set_join(maze, *i); },
+            _ => {}
+        }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_kruskal() {
+        let mut maze = Maze::new(5, 5);
+        generate(&mut maze);
+        assert_eq!(maze.get(2, 4), maze.get(2, 0));
+        assert_eq!(maze.get(2, 4), 1);
+    }
+}

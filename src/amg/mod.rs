@@ -7,6 +7,7 @@ mod structures;
 mod wilson;
 mod kruskal;
 mod image;
+mod utils;
 
 pub struct Maze {
     pub maze: Vec<i32>,
@@ -56,17 +57,17 @@ impl Maze {
                 wilson::random_walk(self, *i);
             }
         }
-        // Kruskal Set Join
+        // Combine Wilson and Kruskal
         loop {
             let mut tiles: Vec<usize> = (0..size).filter(|x| self.maze[*x] == 0).collect();
             tiles.shuffle(&mut rnd);
             for i in tiles.iter() {
                 if self.maze[*i] != 0 { continue; }
-                let neigh: Vec<i32> = dirs.iter().map(|x| self.maze[(*i as i32 + x) as usize]).filter(|x| *x > 0).collect();
-                if neigh.len() == 0 {
-                    wilson::random_walk(self, *i);
-                } else if neigh.len() == 1 || neigh.iter().unique().count() > 1 {
-                    kruskal::set_join(self, *i);
+                match utils::get_num_diff_neighbours(&self.maze, *i, self.width) {
+                    utils::DiffNeigh::None => { wilson::random_walk(self, *i); },
+                    utils::DiffNeigh::One => { kruskal::set_join(self, *i); },
+                    utils::DiffNeigh::MultDiff => { kruskal::set_join(self, *i); },
+                    _ => {}
                 }
             }
             if important_points.iter().map(|x| self.maze[*x]).unique().count() == 1 {
@@ -92,6 +93,10 @@ impl Maze {
         } else {
             0
         }
+    }
+
+    pub fn index_to_coordinate(&self, i:usize) -> (usize, usize) {
+        return (i%self.width, i/self.width);
     }
 
     pub fn print(&self) {
