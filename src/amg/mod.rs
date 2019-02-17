@@ -1,7 +1,6 @@
 
 use rand::thread_rng;
 use rand::seq::SliceRandom;
-use itertools::Itertools;
 
 mod structures;
 mod wilson;
@@ -43,38 +42,12 @@ impl Maze {
         let size = self.maze.len();
         let important_points: Vec<usize> = (0..size).filter(|x| self.maze[*x] > 0).collect();
         for i in important_points.iter() {
-            if *i >= self.width && *i < size - self.width {
-                wilson::random_walk(self, *i);
-            }
+            wilson::carve_from_room(self, *i);
         }
-        // Wilson Random Walk
-        let dirs: Vec<i32> = vec![-1, 1, -(self.width as i32), self.width as i32];
-        let mut tiles: Vec<usize> = (0..size).filter(|x| self.maze[*x] == 0).collect();
-        tiles.shuffle(&mut rnd);
-        for i in tiles.iter() {
-            if self.maze[*i] != 0 { continue; }
-            if dirs.iter().map(|x| self.maze[(*i as i32 + x) as usize]).filter(|x| *x > 0).count() == 0 {
-                wilson::random_walk(self, *i);
-            }
-        }
-        // Combine Wilson and Kruskal
-        loop {
-            let mut tiles: Vec<usize> = (0..size).filter(|x| self.maze[*x] == 0).collect();
-            tiles.shuffle(&mut rnd);
-            for i in tiles.iter() {
-                if self.maze[*i] != 0 { continue; }
-                match utils::get_num_diff_neighbours(&self.maze, *i, self.width) {
-                    utils::DiffNeigh::None => { wilson::random_walk(self, *i); },
-                    utils::DiffNeigh::One => { kruskal::set_join(self, *i); },
-                    utils::DiffNeigh::MultDiff => { kruskal::set_join(self, *i); },
-                    _ => {}
-                }
-            }
-            if important_points.iter().map(|x| self.maze[*x]).unique().count() == 1 {
-                break;
-            }
-            break;
-        }
+        self.print();
+        wilson::generate_sparse(self);
+        self.print();
+        kruskal::generate(self);
         // Remove stubs (randomly)
         let mut spaces: Vec<usize> = (self.width..(size-self.width)).filter(|x| self.maze[*x] == 1 && 
             vec![*x + 1, *x - 1, *x + self.width, *x - self.width].iter().filter(|y| self.maze[**y] > 0).count() == 1).collect();
@@ -115,5 +88,20 @@ impl Maze {
             }
             println!();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_generate() {
+        let mut maze = Maze::new(5, 5);
+        maze.generate();
+        maze.print();
+        assert!(maze.maze.iter().filter(|x| **x > 0).count() > 4);
+        assert_eq!(maze.get(2, 4), maze.get(2, 0));
+        assert_eq!(maze.get(2, 4), 1);
     }
 }
