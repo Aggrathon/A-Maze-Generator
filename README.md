@@ -21,34 +21,34 @@ best measures of a good maze. They, of course, contribute to the quality of a ma
 but some additions can improve the fun-value. My proposed additions are:
 
  1. Structures: Non-standard features that can have unique looks or
-    functionality, eg. a big tree or a bridge.
+    functionality, a big tree, a house, a fountain, etc.
  1. Possible loops: Make the left-turn rule infeasible
  1. Remove useless decisions: Help people focus on things that matter.
 
 ## Algorithm Structure
 
 The algorithm is essentially a combination of two existing maze algorithms,
-Wilson's and Kruskal's (short descriptions below), with the idea of premade
-structures. The implementation is based on a four step process:
+Wilson's and Kruskal's (short descriptions below), with the ideas outline
+above. The implementation is based on a five step process:
 
-1. Generate/Define Structures:  
+1. Generate/Define Structures (Optional)
     - Start by creating the maze area and any static features, eg. start,
         end, and structures.
-    - Use Wilson's algorithm starting from all the doors (or equivalent
-        openings). This is done to ensure that no door have a wall on
-        either side.
-    - Having structures with multiple "doors" are what may create loops
-    - Structures are optional, but if not used then this algorithm
-        reduces to the Wilson's algorithm.
+1. Ensure no blocked doors (Optional)
+    - Start Wilson's algorithm from all doors
+    - Having structures with multiple "doors" is what may create loops
+    - Loops can (optionally) be avoided by cutting the (Wilson) paths
+        that leads to loops in half
 1. Fill in the rest of the maze with Wilson's algorithm.
     - So most of the maze will share the properties of Wilson's
-    algorithm (perfection and uniformity).
+        algorithm (perfection and uniformity).
 1. Connect all separate parts of the maze with Kruskal's algorithm.
     - To make sure that there are no inaccessible areas.
-1. Remove all dead-ends of length 1
+    - If no structures, start or end is defined, then this step is
+        not used (the algorithm reduces to Wilson's algorithm)
+1. Remove all dead-ends of length 1 (Optional)
     - At an intersection, if one branch is only one tile long,
         then remove it.
-    - This is an optional step.
 
 ### Wilson's algorithm
 
@@ -68,3 +68,19 @@ is the size of the maze).
 Start with each node in its own set. For each pair of adjacent nodes
 if they are not in the same set create a passage between them and merge
 their sets.
+
+## Implementation
+
+In this repo contains a simple implementation in Rust. This implementation
+only works on a 2D grid with simple structures (no bridges, teleports, etc.),
+but these limitations aren't inherent to the algorithm.
+
+Included is also maze visualisations in both text and image formats. As a
+bonus there is a random recursive backtracking solver which can be used to
+draw different paths between the start and the end. For examples, see below.
+
+More mazes can be generated with: `cargo run`
+
+## Examples
+
+> TODO: Insert images
