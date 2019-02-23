@@ -46,6 +46,15 @@ pub(super) fn get_num_diff_neighbours(arr: &[i32], i: usize, width: usize) -> Di
     return DiffNeigh::MultSame;
 } 
 
+pub(super) fn get_num_neighbours(arr: &[i32], i:usize, width:usize) -> i32 {
+    let mut num = 0;
+    if arr[i-1] > 0 { num += 1; }
+    if arr[i+1] > 0 { num += 1; }
+    if arr[i-width] > 0 { num += 1; }
+    if arr[i+width] > 0 { num += 1; }
+    num
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

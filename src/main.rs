@@ -7,7 +7,7 @@ use image::Rgb;
 mod amg;
 
 fn main() {
-    let mut maze = amg::Maze::new(50, 50);
+    let mut maze = amg::Maze::new(50, 50, true);
     maze.generate();
     maze.print();
     maze.to_image(3).save("maze.png").unwrap();

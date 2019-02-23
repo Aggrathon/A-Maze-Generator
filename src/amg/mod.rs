@@ -1,12 +1,10 @@
 
-use rand::thread_rng;
-use rand::seq::SliceRandom;
-
 pub mod structures;
 pub mod wilson;
 pub mod kruskal;
 pub mod image;
 pub mod solve;
+pub mod clean;
 mod utils;
 
 pub struct Maze {
@@ -18,7 +16,7 @@ pub struct Maze {
 }
 
 impl Maze {
-    pub fn new(width: usize, height: usize) -> Maze {
+    pub fn new(width: usize, height: usize, exits: bool) -> Maze {
         let mut maze: Vec<i32> = vec![0; width*height];
         for i in 0..width {
             maze[i] = -1;
@@ -28,35 +26,25 @@ impl Maze {
             maze[i*width] = -1;
             maze[(i+1)*width - 1] = -1;
         }
-        let x = width / 2;
-        maze[x] = 1;
-        maze[width*height - x - 1] = 2;
-        Maze {maze, width, height, counter: 3, structures: vec![]}
+        let counter;
+        if exits {
+            let x = width / 2;
+            maze[x] = 1;
+            maze[width*height - x - 1] = 2;
+            counter = 3;
+        } else {
+            counter = 1;
+        }
+        Maze {maze, width, height, counter: counter, structures: vec![]}
     }
 
     pub fn generate(&mut self) {
-        let mut rnd = thread_rng();
-        let str_size = 4;
-        let str_cnt = (self.width * self.height) / (str_size * str_size * 4);
-        // Structures
-        self.structures = structures::generate(self, str_cnt, str_size, str_size, 3, 4);
-        let size = self.maze.len();
-        let important_points: Vec<usize> = (0..size).filter(|x| self.maze[*x] > 0).collect();
-        for i in important_points.iter() {
-            wilson::carve_from_room(self, *i);
-        }
+        self.structures = structures::generate_default(self);
+        (0..self.maze.len()).filter(|i| self.maze[*i] > 0).collect::<Vec<usize>>()
+            .into_iter().for_each(|i| wilson::carve_from_room(self, i));
         wilson::generate_sparse(self);
         kruskal::generate(self);
-        // Remove stubs (randomly)
-        let mut spaces: Vec<usize> = (self.width..(size-self.width)).filter(|x| self.maze[*x] == 1 && 
-            vec![*x + 1, *x - 1, *x + self.width, *x - self.width].iter().filter(|y| self.maze[**y] > 0).count() == 1).collect();
-        spaces.shuffle(&mut rnd);
-        for i in spaces.iter() {
-            let j = vec![*i + 1, *i - 1, *i + self.width, *i - self.width].iter().filter(|y| self.maze[**y] > 0).fold(*i, |_, x| *x);
-            if vec![j + 1, j - 1, j + self.width, j - self.width].iter().filter(|y| self.maze[**y] > 0).count() > 2 {
-                self.maze[*i] = 0;
-            }
-        }
+        clean::remove_stubs(self);
     }
 
     pub fn get(&self, x:usize, y:usize) -> i32 {
@@ -64,6 +52,12 @@ impl Maze {
             self.maze[x + y * self.width]
         } else {
             0
+        }
+    }
+
+    pub fn set(&mut self, x:usize, y:usize, value:i32) {
+        if x < self.width && y < self.height {
+            self.maze[x + y * self.width] = value;
         }
     }
 
@@ -96,7 +90,7 @@ mod tests {
 
     #[test]
     fn test_generate() {
-        let mut maze = Maze::new(5, 5);
+        let mut maze = Maze::new(5, 5, true);
         maze.generate();
         assert!(maze.maze.iter().filter(|x| **x > 0).count() > 4);
         assert_eq!(maze.get(2, 4), maze.get(2, 0));
@@ -105,7 +99,7 @@ mod tests {
 
     #[test]
     fn test_index() {
-        let mut maze = Maze::new(5, 5);
+        let mut maze = Maze::new(5, 5, true);
         maze.maze[13] = 3;
         assert_eq!(3, maze.index_to_coordinate(13).0);
         assert_eq!(2, maze.index_to_coordinate(13).1);

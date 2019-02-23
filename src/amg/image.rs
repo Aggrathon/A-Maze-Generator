@@ -46,7 +46,7 @@ mod tests {
 
     #[test]
     fn test_image() {
-        let maze = Maze::new(5, 4);
+        let maze = Maze::new(5, 4, true);
         let img = maze.to_image(3);
         assert_eq!((maze.width * 3) as u32, img.width());
         assert_eq!(4 * 3, img.height());
@@ -54,10 +54,10 @@ mod tests {
 
     #[test]
     fn test_image_path() {
-        let maze = Maze::new(6, 5);
+        let maze = Maze::new(6, 5, true);
         let img = maze.to_image(3);
         let mut img2: RgbImage = img.convert();
-        add_path_to_maze_image(&maze, &[9 as usize, 10, 16, 17, 23], &mut img2, Rgb([255u8, 128u8, 128u8]));
+        add_path_to_maze_image(&maze, &[9 as usize, 10, 16, 17, 23], &mut img2, Rgb([255u8, 128u8, 128u8]), 1);
         assert_eq!((maze.width * 3) as u32, img2.width());
         assert_eq!(5 * 3, img2.height());
     }

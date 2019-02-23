@@ -106,7 +106,7 @@ mod tests {
 
     #[test]
     fn test_wilson() {
-        let mut maze = Maze::new(5, 5);
+        let mut maze = Maze::new(5, 5, true);
         generate(&mut maze);
         assert!(maze.maze.iter().filter(|x| **x > 0).count() > 4);
     }

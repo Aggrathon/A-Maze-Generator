@@ -42,7 +42,7 @@ mod tests {
 
     #[test]
     fn test_kruskal() {
-        let mut maze = Maze::new(5, 5);
+        let mut maze = Maze::new(5, 5, true);
         generate(&mut maze);
         assert_eq!(maze.get(2, 4), maze.get(2, 0));
         assert_eq!(maze.get(2, 4), 1);

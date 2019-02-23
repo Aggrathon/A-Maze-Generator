@@ -62,6 +62,12 @@ pub fn generate(maze: &mut Maze, count: usize, max_width: usize, max_height: usi
     struc
 }
 
+pub fn generate_default(maze: &mut Maze) -> Vec<Rect> {
+    let str_size = 4;
+    let str_cnt = (maze.width * maze.height) / (str_size * str_size * 4);
+    generate(maze, str_cnt, str_size, str_size, 3, str_size)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
