@@ -1,7 +1,8 @@
 # Game Maze Generator
 
-TODO: Write more here  
-Generate interesting mazes.
+The goal of this project is to create, and implement, a maze generating algorithm.
+The algorithm is focused on creating interesting algorithms for real life or
+video games, rather than for a top down global solver.
 
 ## A Quick Introduction to Maze Algorithms
 
@@ -73,7 +74,7 @@ their sets.
 
 In this repo contains a simple implementation in Rust. This implementation
 only works on a 2D grid with simple structures (no bridges, teleports, etc.),
-but these limitations aren't inherent to the algorithm.
+but these limitations are due to the implementation, and not inherent to the algorithm.
 
 Included is also maze visualisations in both text and image formats. As a
 bonus there is a random recursive backtracking solver which can be used to
@@ -83,4 +84,10 @@ More mazes can be generated with: `cargo run`
 
 ## Examples
 
-> TODO: Insert images
+Example of a generated 50x50 maze:
+
+![Maze Example 1](docs/maze.png)
+
+Example of a maze solved by 6 *random recursive backtrackers*:
+
+![Maze Example 2](docs/maze_solved.png)
