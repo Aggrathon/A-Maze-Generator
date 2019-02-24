@@ -1,4 +1,4 @@
-# A Maze Generator
+# A Maze Algorithm
 
 The goal of this project is to create, and implement, a maze generating algorithm.
 The algorithm is focused on creating interesting algorithms for real life or
