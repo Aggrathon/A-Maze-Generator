@@ -84,9 +84,10 @@ More mazes can be generated with: `cargo run`
 
 ## Examples
 
-Example of a generated 50x50 maze:
+Example of generated 50x50 mazes:
 
-![Maze Example 1](docs/maze.png)
+![Maze Example 1](docs/maze1.png)
+![Maze Example 2](docs/maze2.png)
 
 Example of a maze solved by 6 *random recursive backtrackers*:
 
