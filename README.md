@@ -11,7 +11,7 @@ target of many maze generation algorithms. Another quality of maze generation
 algorithms is avoiding patterns, taking this to the extreme is uniform algorithms
 where all possible mazes are equally likely to be generated.
 
-A More detailed overview of different maze designs and algorithms can be found here:
+A More detailed overview of different maze designs and algorithms can be found here:  
 [http://www.astrolog.org/labyrnth/algrithm.htm](http://www.astrolog.org/labyrnth/algrithm.htm)
 
 ## Algorithm Design Goals
