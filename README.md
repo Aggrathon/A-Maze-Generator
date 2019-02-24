@@ -1,10 +1,10 @@
-# Game Maze Generator
+# A Maze Generator
 
 The goal of this project is to create, and implement, a maze generating algorithm.
 The algorithm is focused on creating interesting algorithms for real life or
 video games, rather than for a top down global solver.
 
-## A Quick Introduction to Maze Algorithms
+## Quick Introduction to Maze Algorithms
 
 A "perfect" maze is one without loops that has no inaccessible areas. This is the
 target of many maze generation algorithms. Another quality of maze generation
