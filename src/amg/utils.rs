@@ -1,4 +1,5 @@
 
+use super::Maze;
 
 pub(super) fn get_lowest_neighbour(arr: &[i32], i: usize, width: usize, default: i32) -> i32 {
     if i >= arr.len() { return default; }
@@ -53,6 +54,23 @@ pub(super) fn get_num_neighbours(arr: &[i32], i:usize, width:usize) -> i32 {
     if arr[i-width] > 0 { num += 1; }
     if arr[i+width] > 0 { num += 1; }
     num
+}
+
+pub(super) fn dot_init_maze(maze: &mut Maze) {
+    let x = maze.width/2;
+    let y = maze.height/2;
+    let i = maze.counter;
+    maze.set(x, y, i);
+    maze.counter += 1;
+}
+
+pub(super) fn get_neighbours_wrapping(i: usize, w: usize) -> [usize; 4] {
+    [
+        i.wrapping_add(1),
+        i.wrapping_sub(1),
+        i.wrapping_add(w),
+        i.wrapping_sub(w)
+    ]
 }
 
 #[cfg(test)]

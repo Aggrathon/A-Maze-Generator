@@ -41,7 +41,7 @@ impl Maze {
     pub fn generate(&mut self) {
         self.structures = structures::generate_default(self);
         (0..self.maze.len()).filter(|i| self.maze[*i] > 0).collect::<Vec<usize>>()
-            .into_iter().for_each(|i| wilson::carve_from_room(self, i));
+            .into_iter().for_each(|i| wilson::carve_from_room(self, i, true));
         wilson::generate_sparse(self);
         kruskal::generate(self);
         clean::remove_stubs(self);
@@ -63,6 +63,10 @@ impl Maze {
 
     pub fn index_to_coordinate(&self, i:usize) -> (usize, usize) {
         return (i%self.width, i/self.width);
+    }
+
+    pub fn coordinate_to_index(&self, x:usize, y:usize) -> usize {
+        return x + self.width * y;
     }
 
     pub fn print(&self) {
@@ -90,19 +94,30 @@ mod tests {
 
     #[test]
     fn test_generate() {
-        let mut maze = Maze::new(5, 5, true);
+        let size = 13;
+        let mut maze = Maze::new(size, size, true);
         maze.generate();
-        assert!(maze.maze.iter().filter(|x| **x > 0).count() > 4);
-        assert_eq!(maze.get(2, 4), maze.get(2, 0));
-        assert_eq!(maze.get(2, 4), 1);
+        assert!(maze.maze.iter().filter(|x| **x > 0).count() > 10);
+        assert_eq!(maze.get(size/2, size-1), maze.get(size/2, 0));
+        assert_eq!(maze.get(size/2, size-1), 1);
+        maze.structures.iter().for_each(|s| {
+            (*s).border(maze.width, true, |x| {
+                if maze.maze[x] == 1 {
+                    assert!(utils::get_num_neighbours(&maze.maze, x, maze.width) > 1)
+                } else {
+                    assert_eq!(maze.maze[x], -1);
+                }
+            });
+        });
     }
 
     #[test]
     fn test_index() {
         let mut maze = Maze::new(5, 5, true);
         maze.maze[13] = 3;
+        assert_eq!(3, maze.get(3, 2));
         assert_eq!(3, maze.index_to_coordinate(13).0);
         assert_eq!(2, maze.index_to_coordinate(13).1);
-        assert_eq!(3, maze.get(3, 2));
+        assert_eq!(13, maze.coordinate_to_index(3, 2));
     }
 }

@@ -5,11 +5,11 @@ use itertools::Itertools;
 pub struct Rect(usize, usize, usize, usize);
 
 impl Rect {
-    fn overlaps(&self, other: &Rect) -> bool {
+    pub fn overlaps(&self, other: &Rect) -> bool {
         !(self.2 < other.0 || self.0 > other.2 || self.3 < other.1 || self.1 > other.3)
     }
 
-    fn border<P>(&self, width: usize, corners: bool, f: P) where P: FnMut(usize) {
+    pub fn border<P>(&self, width: usize, corners: bool, f: P) where P: FnMut(usize) {
         let t;
         let b;
         if corners {
