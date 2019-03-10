@@ -1,5 +1,4 @@
 
-use itertools::Itertools;
 use image::{GrayImage, Luma, FilterType, imageops::resize, Rgb, RgbImage, ConvertBuffer};
 use super::Maze;
 
@@ -22,23 +21,6 @@ impl Maze {
     }
 }
 
-pub fn add_path_to_maze_image(maze: &Maze, path: &[usize], img: &mut RgbImage, color: Rgb<u8>, offset: u32) {
-    if path.len() == 0 { return; }
-    let tile_width = img.width() / (maze.width as u32);
-    let mut prev = path[0];
-    for p in path.iter().skip(1) {
-        let (x1, y1) = maze.index_to_coordinate(*p);
-        let (x2, y2) = maze.index_to_coordinate(prev);
-        let x3 = std::cmp::min(x1, x2) as u32 * tile_width + offset;
-        let x4 = std::cmp::max(x1, x2) as u32 * tile_width + offset + 1;
-        let y3 = std::cmp::min(y1, y2) as u32 * tile_width + offset;
-        let y4 = std::cmp::max(y1, y2) as u32 * tile_width + offset + 1;
-        (x3..x4).cartesian_product(y3..y4).for_each(|(x, y)| img.put_pixel(x, y, color));
-        prev = *p;
-    }
-}
-
-
 
 #[cfg(test)]
 mod tests {
@@ -50,15 +32,5 @@ mod tests {
         let img = maze.to_image(3);
         assert_eq!((maze.width * 3) as u32, img.width());
         assert_eq!(4 * 3, img.height());
-    }
-
-    #[test]
-    fn test_image_path() {
-        let maze = Maze::new(6, 5, true);
-        let img = maze.to_image(3);
-        let mut img2: RgbImage = img.convert();
-        add_path_to_maze_image(&maze, &[9 as usize, 10, 16, 17, 23], &mut img2, Rgb([255u8, 128u8, 128u8]), 1);
-        assert_eq!((maze.width * 3) as u32, img2.width());
-        assert_eq!(5 * 3, img2.height());
     }
 }

@@ -42,7 +42,7 @@ impl Maze {
     pub fn generate(&mut self, loops: bool, ) {
         (0..self.maze.len()).filter(|i| self.maze[*i] > 0).collect::<Vec<usize>>()
             .into_iter().for_each(|i| wilson::carve_from_room(self, i, loops));
-        //wilson::generate_sparse(self);
+        wilson::generate_sparse(self);
         kruskal::generate(self);
     }
 
@@ -66,6 +66,12 @@ impl Maze {
 
     pub fn coordinate_to_index(&self, x:usize, y:usize) -> usize {
         return x + self.width * y;
+    }
+
+    pub fn index_distance(&self, i:usize, j:usize) -> usize {
+        let c1 = self.index_to_coordinate(i);
+        let c2 = self.index_to_coordinate(j);
+        c1.0 + c1.1 + c2.0 + c2.1 - 2 * std::cmp::min(c1.0, c2.0) - 2 * std::cmp::min(c1.1, c2.1)
     }
 
     pub fn print(&self) {

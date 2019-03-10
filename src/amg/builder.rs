@@ -1,5 +1,6 @@
 
-use image::Rgb;
+use rand::{thread_rng, Rng};
+
 use super::Maze;
 
 pub struct MazeBuilder {
@@ -93,19 +94,33 @@ impl MazeBuilder {
             maze.to_image(3).save(self._name.to_string()+".png").unwrap();
         }
         if self._solve {
-            let mut image = maze.to_image_color(6);
-            for (i, c) in [
-                Rgb([255, 128, 128]),
-                Rgb([128, 128, 255]),
-                Rgb([255, 64, 255]),
-                Rgb([64, 255, 255]),
-                Rgb([64, 255, 128]),
-                Rgb([255, 255, 128])
-            ].iter().enumerate() {
-                let path = super::solve::recursive_backtracker(&maze, maze.width/2, maze.maze.len()-maze.width/2-1);
-                super::image::add_path_to_maze_image(&maze, &path, &mut image, *c, i as u32);
+            let starts: Vec<usize>;
+            let ends: Vec<usize>;
+            if self._exit {
+                let start = (1..maze.width).filter(|i| maze.maze[*i] > 0).nth(0).unwrap();
+                let end = ((maze.maze.len()-maze.width)..maze.maze.len())
+                    .filter(|i| maze.maze[*i] > 0).nth(0).unwrap();
+                starts = vec![start; 6];
+                ends = vec![end; 6];
+            } else {
+                let mut rng = thread_rng();
+                starts = (0..8).map(|_| {
+                    let mut i: usize = rng.gen_range(0, maze.maze.len());
+                    while maze.maze[i] < 1 {
+                        i = rng.gen_range(0, maze.maze.len());
+                    }
+                    i
+                }).collect();
+                ends = starts.iter().map(|i| {
+                    let mut j: usize = rng.gen_range(0, maze.maze.len());
+                    while maze.maze[j] < 1 || maze.index_distance(*i, j) < maze.width / 2 {
+                        j = rng.gen_range(0, maze.maze.len());
+                    }
+                    j
+                }).collect();
             }
-            image.save(self._name.to_string()+"_solved.png").unwrap();
+            super::solve::draw_paths(&maze, &starts, &ends)
+                .save(self._name.to_string()+"_solved.png").unwrap()
         }
         maze.print();
         maze
