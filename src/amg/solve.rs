@@ -38,8 +38,7 @@ mod tests {
 
     #[test]
     fn test_recursive() {
-        let mut maze = Maze::new(15, 20, true);
-        maze.generate();
+        let maze = Maze::builder(15, 20).build();
         assert_eq!(maze.maze[7], 1);
         assert_eq!(maze.maze[15*20-8], 1);
         let path = recursive_backtracker(&maze, 7, 15*20-8);

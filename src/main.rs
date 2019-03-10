@@ -2,26 +2,74 @@ extern crate rand;
 extern crate itertools;
 extern crate image;
 
-use image::Rgb;
+use std::env;
 
 mod amg;
 
 fn main() {
-    let mut maze = amg::Maze::new(50, 50, true);
-    maze.generate();
-    maze.print();
-    maze.to_image(3).save("maze.png").unwrap();
-    let mut image = maze.to_image_color(6);
-    for (i, c) in [
-        Rgb([255, 128, 128]),
-        Rgb([128, 128, 255]),
-        Rgb([255, 64, 255]),
-        Rgb([64, 255, 255]),
-        Rgb([64, 255, 128]),
-        Rgb([255, 255, 128])
-    ].iter().enumerate() {
-        let path = amg::solve::recursive_backtracker(&maze, maze.width/2, maze.maze.len()-maze.width/2-1);
-        amg::image::add_path_to_maze_image(&maze, &path, &mut image, *c, i as u32);
+    parse_args();
+}
+
+fn parse_args() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 3 {
+        print_help(&args[0]);
+    } else {
+        let width = match args[1].parse::<usize>() {
+            Ok(x) => x,
+            Err(_) => { print_help(&args[0]); return; }
+        };
+        let height = match args[2].parse::<usize>() {
+            Ok(x) => x,
+            Err(_) => { print_help(&args[0]); return; }
+        };
+        let mut builder = amg::Maze::builder(width, height);
+        args.iter().skip(3).for_each(|x| {
+            if x.chars().count() < 2 { return; }
+            let mut iter = x.chars().peekable();
+            if iter.next().unwrap() != '-' { 
+                builder.filename(x.clone());
+                return; 
+            }
+            let next = *iter.peek().unwrap();
+            if next == '-' { 
+                if x == "--help" {
+                    print_help(&args[0]);
+                } else {
+                    builder.parse_word(&x[2..]);
+                }
+            } else {
+                iter.for_each(|x| {
+                    if x == 'h' {
+                        print_help(&args[0]);
+                    } else {
+                        builder.parse_letter(x);
+                    }
+                })
+            }
+        });
+        builder.build();
     }
-    image.save("maze_solved.png").unwrap();
+}
+
+fn print_help(bin: &String) {
+    println!("");
+    println!("A Maze Generator");
+    println!("");
+    println!("Usage:");
+    println!("  {} width height [options] [filename]", bin);
+    println!("  {} -h | --help", bin);
+    println!("");
+    println!("Options:");
+    println!("  -h --help       Show this screen");
+    println!("  -s --no-struct  Don't generate structures");
+    println!("  -e --no-exit    Don't add an entrance and an exit to the maze");
+    println!("  -l --no-loops   Disallow loops");
+    println!("  -t --no-stubs   Don't remove stubs");
+    println!("  -i --image      Save the maze as an image" );
+    println!("  -o --solve      Save the maze with solved paths as an image");
+    println!("");
+    println!("Parameters:");
+    println!("  filename        filename for storing images (without ending, default: 'maze')");
+    println!("");
 }

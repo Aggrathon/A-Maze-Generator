@@ -5,6 +5,7 @@ pub mod kruskal;
 pub mod image;
 pub mod solve;
 pub mod clean;
+pub mod builder;
 mod utils;
 
 pub struct Maze {
@@ -38,13 +39,11 @@ impl Maze {
         Maze {maze, width, height, counter: counter, structures: vec![]}
     }
 
-    pub fn generate(&mut self) {
-        self.structures = structures::generate_default(self);
+    pub fn generate(&mut self, loops: bool, ) {
         (0..self.maze.len()).filter(|i| self.maze[*i] > 0).collect::<Vec<usize>>()
-            .into_iter().for_each(|i| wilson::carve_from_room(self, i, true));
-        wilson::generate_sparse(self);
+            .into_iter().for_each(|i| wilson::carve_from_room(self, i, loops));
+        //wilson::generate_sparse(self);
         kruskal::generate(self);
-        clean::remove_stubs(self);
     }
 
     pub fn get(&self, x:usize, y:usize) -> i32 {
@@ -96,7 +95,7 @@ mod tests {
     fn test_generate() {
         let size = 13;
         let mut maze = Maze::new(size, size, true);
-        maze.generate();
+        maze.generate(true);
         assert!(maze.maze.iter().filter(|x| **x > 0).count() > 10);
         assert_eq!(maze.get(size/2, size-1), maze.get(size/2, 0));
         assert_eq!(maze.get(size/2, size-1), 1);

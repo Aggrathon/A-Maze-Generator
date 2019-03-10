@@ -83,7 +83,6 @@ pub fn carve_from_room(maze: &mut Maze, index: usize, loops: bool) {
         path.into_iter().for_each(|i| maze.maze[i] = set);
     } else {
         let len = path.len() / 2;
-        dbg!(len);
         maze.maze[index] = r;
         path.into_iter().skip(len).for_each(|i| maze.maze[i] = r);
     }

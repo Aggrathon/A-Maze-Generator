@@ -41,9 +41,9 @@ pub(super) fn get_num_diff_neighbours(arr: &[i32], i: usize, width: usize) -> Di
     }
     if i == 0 { return DiffNeigh::None; }
     if i == 1 { return DiffNeigh::One; }
-    if i <= dir.len() { for j in 1..i {
+    for j in 1..i {
         if dir[j] != dir[j-1] { return DiffNeigh::MultDiff; }
-    }};
+    };
     return DiffNeigh::MultSame;
 } 
 
