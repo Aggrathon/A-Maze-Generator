@@ -1,9 +1,9 @@
 [package]
-name = "GameMazeGenerator"
+name = "a_maze_algorithm"
 version = "0.1.0"
 authors = ["Aggrathon <antonbjo@gmail.com>"]
 
 [dependencies]
 rand = "0.6"
 itertools = "0.8"
-image = "0.21"
+image = "0.24"
