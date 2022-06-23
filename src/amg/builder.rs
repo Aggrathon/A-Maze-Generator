@@ -1,4 +1,3 @@
-
 use rand::{thread_rng, Rng};
 
 use super::Maze;
@@ -12,20 +11,21 @@ pub struct MazeBuilder {
     _loops: bool,
     _stubs: bool,
     _structs: bool,
-    _name: String
+    _name: String,
 }
 
 impl Maze {
     pub fn builder(width: usize, height: usize) -> MazeBuilder {
-        MazeBuilder{
-            width, height,
+        MazeBuilder {
+            width,
+            height,
             _image: false,
             _solve: false,
             _exit: true,
             _loops: true,
             _stubs: false,
             _structs: true,
-            _name: String::from("Maze")
+            _name: String::from("Maze"),
         }
     }
 }
@@ -60,14 +60,14 @@ impl MazeBuilder {
         self
     }
     pub fn parse_word(&mut self, word: &str) -> &mut MazeBuilder {
-        match word.as_ref() {
+        match word {
             "image" => self.image(true),
             "solve" => self.solve(true),
             "no-exit" => self.exits(false),
             "no-loops" => self.loops(false),
             "no-stubs" => self.stubs(false),
             "no-struct" => self.structures(false),
-            &_ => self
+            &_ => self,
         }
     }
     pub fn parse_letter(&mut self, letter: char) -> &mut MazeBuilder {
@@ -78,7 +78,7 @@ impl MazeBuilder {
             'l' => self.loops(false),
             't' => self.stubs(false),
             's' => self.structures(false),
-            _ => self
+            _ => self,
         }
     }
     pub fn build(&self) -> Maze {
@@ -91,36 +91,45 @@ impl MazeBuilder {
             maze.remove_stubs();
         }
         if self._image {
-            maze.to_image(3).save(self._name.to_string()+".png").unwrap();
+            maze.to_image(3)
+                .save(self._name.to_string() + ".png")
+                .unwrap();
         }
         if self._solve {
             let starts: Vec<usize>;
             let ends: Vec<usize>;
             if self._exit {
-                let start = (1..maze.width).filter(|i| maze.maze[*i] > 0).nth(0).unwrap();
-                let end = ((maze.maze.len()-maze.width)..maze.maze.len())
-                    .filter(|i| maze.maze[*i] > 0).nth(0).unwrap();
+                let start = (1..maze.width).find(|i| maze.maze[*i] > 0).unwrap();
+                let end = ((maze.maze.len() - maze.width)..maze.maze.len())
+                    .find(|i| maze.maze[*i] > 0)
+                    .unwrap();
                 starts = vec![start; 6];
                 ends = vec![end; 6];
             } else {
                 let mut rng = thread_rng();
-                starts = (0..8).map(|_| {
-                    let mut i: usize = rng.gen_range(0, maze.maze.len());
-                    while maze.maze[i] < 1 {
-                        i = rng.gen_range(0, maze.maze.len());
-                    }
-                    i
-                }).collect();
-                ends = starts.iter().map(|i| {
-                    let mut j: usize = rng.gen_range(0, maze.maze.len());
-                    while maze.maze[j] < 1 || maze.index_distance(*i, j) < maze.width / 2 {
-                        j = rng.gen_range(0, maze.maze.len());
-                    }
-                    j
-                }).collect();
+                starts = (0..8)
+                    .map(|_| {
+                        let mut i: usize = rng.gen_range(0, maze.maze.len());
+                        while maze.maze[i] < 1 {
+                            i = rng.gen_range(0, maze.maze.len());
+                        }
+                        i
+                    })
+                    .collect();
+                ends = starts
+                    .iter()
+                    .map(|i| {
+                        let mut j: usize = rng.gen_range(0, maze.maze.len());
+                        while maze.maze[j] < 1 || maze.index_distance(*i, j) < maze.width / 2 {
+                            j = rng.gen_range(0, maze.maze.len());
+                        }
+                        j
+                    })
+                    .collect();
             }
             super::solve::draw_paths(&maze, &starts, &ends)
-                .save(self._name.to_string()+"_solved.png").unwrap()
+                .save(self._name.to_string() + "_solved.png")
+                .unwrap()
         }
         maze.print();
         maze
